@@ -14,49 +14,62 @@
                     [util       :refer [timeout]]]
             [jepsen.os.debian   :as debian]
             [knossos.model      :as model]
-            [clojure.java.shell :only [sh]]))
+            [clojure.java.shell :as sh]))
 
 (defn parse-int [s] (Integer. (re-find  #"^\d+$" s )))
 
 (defn c-get
   [name]
-  (let [res (sh "yt2" "get" (str "//tmp/" name))]
+  (let [res (sh/sh "yt2" "get" (str "//tmp/" name))]
         (if (not= (:exit res) 0) {:type :info, :error :aborted}
             (try
               (parse-int (:out res))
               (catch Exception e
-                  {:type :info, :error :aborted})))
+                  {:type :info, :error :aborted})))))
 
 (defn c-set
   [name val]
-  (let [res (sh "yt2" "set" (str "//tmp/" name) (str val))]
+  (let [res (sh/sh "yt2" "set" (str "//tmp/" name) (str val))]
         (if (not= res {:exit 0 :out "" :err ""})
             {:type :info, :error :aborted}
-            {:type :ok}))
+            {:type :ok})))
 
 (defn wait-and-set
   [name val]
   (while (not= :ok (:type (c-set name val)))
     (Thread/sleep 5000)))
 
-(def client
+(def db
+  (reify db/DB
+    (setup! [_ test node]
+      (c/su
+        (c/exec :bash "/master/run.sh")))
+    (teardown! [_ test node]
+      (c/su
+        (c/exec :bash "/master/stop.sh")))
+    db/LogFiles
+      (log-files [_ test node]
+        ["/master/master.log"])))
+
+
+(defn client
   [name value]
   (reify client/Client
     (setup! [this test node] (do ((wait-and-set atom value)
                                   (info "Cypress set up")
-                                  this))
-    (invoke! [this test op])
+                                  this)))
+    (invoke! [this test op]
       (timeout 5000 (assoc op :type :info, :error :timeout)
         (case (:f op)
           :read  (merge op (c-get name))
-          :write (merge op (c-set name (:value op)))))))
+          :write (merge op (c-set name (:value op))))))))
 
 (defn r-gen   [_ _] {:type :invoke, :f :read, :value nil})
 (defn w-gen   [_ _] {:type :invoke, :f :write, :value (rand-int 5)})
 
 (def init-val 0)
 
-(defn zk-test
+(defn c-test
   "Given an options map from the command-line runner (e.g. :nodes, :ssh,
   :concurrency, ...), constructs a test map."
   [opts]
@@ -85,6 +98,6 @@
   "Handles command line arguments. Can either run a test, or a web server for
   browsing results."
   [& args]
-  (cli/run! (merge (cli/single-test-cmd {:test-fn zk-test})
+  (cli/run! (merge (cli/single-test-cmd {:test-fn c-test})
                    (cli/serve-cmd))
            args))
