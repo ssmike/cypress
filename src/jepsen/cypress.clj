@@ -76,7 +76,8 @@
   "Handles command line arguments. Can either run a test, or a web server for
   browsing results."
   [& args]
-  (org.eclipse.jetty.util.log.Log/setLog nil)
+  ;; to disable shitty logs
+  (. (org.slf4j.LoggerFactory/getLogger org.slf4j.Logger/ROOT_LOGGER_NAME) setLevel ch.qos.logback.classic.Level/INFO)
   (cli/run! (merge (cli/single-test-cmd {:test-fn c-test})
                    (cli/serve-cmd))
            args))
