@@ -44,6 +44,7 @@
   (let [port (swap! free-port inc)
         addr (local port)]
     (. (Runtime/getRuntime) exec "proxy.py" (into-array [(str port)]))
+    (Thread/sleep 3000) ;;waiting for proxy)
     (let [sock (connect addr)]
       (ysend sock :wait-for-yt)
        sock)))
