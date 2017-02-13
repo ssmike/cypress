@@ -4,10 +4,16 @@
             [clojure.java.shell :as sh]))
 
 (def encode json/write-str)
+
 (defn decode
   [msg]
   (let [mp (json/read-str msg)]
-    (into {} (map (fn [[a b]] [(keyword a) b]) mp))))
+    (into {} (map (fn [[a b]] [(keyword a) 
+                               ((case a 
+                                  "value" identity
+                                          keyword)
+                                 b)])
+                  mp))))
 
 (defn connect
   [addr]
