@@ -1,7 +1,7 @@
 (ns jepsen.yt
   (:require [gniazdo.core :as ws]
-            [clojure.data.json :as json]
-            [clojure.java.shell :as sh]))
+            [clojure.data.json :as json])
+  [:import java.lang.Runtime])
 
 (def encode json/write-str)
 
@@ -43,7 +43,7 @@
   []
   (let [port (swap! free-port inc)
         addr (local port)]
-    (sh/sh "proxy.py" (str port))
+    (. (Runtime/getRuntime) exec "proxy.py" (into-array [(str port)]))
     (let [sock (connect addr)]
       (ysend sock :wait-for-yt)
        sock)))
