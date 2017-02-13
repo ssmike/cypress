@@ -65,7 +65,10 @@
           :model   (model/register 0)
           :checker (checker/compose
                      {:perf   (checker/perf)
-                      :linear checker/linearizable})}))
+                      :linear checker/linearizable})
+          :ssh {:username "root",
+                :strict-host-key-checking false,
+                :private-key-path "~/.ssh/yt"}}))
 
 (defn -main
   "Handles command line arguments. Can either run a test, or a web server for
