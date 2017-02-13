@@ -20,10 +20,12 @@
   (reify db/DB
     (setup! [_ test node]
       (c/su
-        (c/exec :bash "/master/run.sh")))
+        (c/exec :bash "/master/run.sh")
+        (info (str node " set up"))))
     (teardown! [_ test node]
       (c/su
-        (c/exec :bash "/master/stop.sh")))
+        (c/exec :bash "/master/stop.sh")
+        (info (str node " teardown!"))))
     db/LogFiles
       (log-files [_ test node]
         ["/master/master.log"])))
