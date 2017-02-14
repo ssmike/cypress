@@ -58,14 +58,15 @@
           :db      db
           :client  (client nil)
           :nemesis (nemesis/partition-random-halves)
+          :timeout 200
           :generator (->> (gen/mix [r-gen w-gen])
                           (gen/stagger 1)
                           (gen/nemesis
-                            (gen/seq (cycle [(gen/sleep 5)
+                            (gen/seq (cycle [(gen/sleep 8)
                                              {:type :info, :f :start}
-                                             (gen/sleep 5)
+                                             (gen/sleep 8)
                                              {:type :info, :f :stop}])))
-                          (gen/time-limit 120))
+                          (gen/time-limit 190))
           :model   (model/register 0)
           :checker (checker/compose
                      {:perf   (checker/perf)
