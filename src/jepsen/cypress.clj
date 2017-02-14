@@ -57,6 +57,7 @@
           :db      db
           :client  (client nil)
           :nemesis (nemesis/partition-random-halves)
+          :timeout 120
           :generator (->> (gen/mix [r-gen w-gen])
                           (gen/stagger 1)
                           (gen/nemesis
@@ -64,7 +65,7 @@
                                              {:type :info, :f :start}
                                              (gen/sleep 5)
                                              {:type :info, :f :stop}])))
-                          (gen/time-limit 15))
+                          (gen/time-limit 120))
           :model   (model/register 0)
           :checker (checker/compose
                      {:perf   (checker/perf)

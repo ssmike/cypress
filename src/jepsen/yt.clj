@@ -3,7 +3,13 @@
             [clojure.data.json :as json])
   [:import java.lang.Runtime])
 
-(def encode json/write-str)
+(defn encode
+  [op]
+  (let [allowed-keys #{:f :value :wait-for-yt}]
+    (json/write-str
+      (conj {} (filter (fn [[x _]]
+                         (contains? allowed-keys x))
+                       op)))))
 
 (defn decode
   [msg]
@@ -46,5 +52,5 @@
     (. (Runtime/getRuntime) exec (into-array ["run-proxy.sh" (str port)]))
     (Thread/sleep 3000) ;;waiting for proxy)
     (let [sock (connect addr)]
-      (ysend sock :wait-for-yt)
+      (ysend sock {:wait-for-yt true})
        sock)))
