@@ -39,7 +39,8 @@
                                   (client sock)))
     (invoke! [this test op]
       (timeout 5000 (assoc op :type :info, :error :timeout)
-        (merge op (yt/ysend con op))))))
+        (merge op (yt/ysend con op))))
+    (teardown! [_ test] (yt/close con))))
 
 (defn r-gen   [_ _] {:type :invoke, :f :read, :value nil})
 (defn w-gen   [_ _] {:type :invoke, :f :write, :value (rand-int 5)})
