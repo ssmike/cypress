@@ -1,6 +1,7 @@
 (ns jepsen.cypress
   (:gen-class)
-  (:require [clojure.tools.logging :refer :all]
+  (:require [clojure.tools.nrepl.server :only (start-server stop-server)]
+            [clojure.tools.logging :refer :all]
             [clojure.java.io    :as io]
             [clojure.string     :as str]
             [jepsen [db         :as db]
@@ -15,6 +16,8 @@
             [jepsen.os.debian   :as debian]
             [knossos.model      :as model]
             [jepsen.yt :as yt]))
+
+(defonce debug-server (start-server :port 7888))
 
 (def db
   (reify db/DB
