@@ -62,9 +62,9 @@
           :generator (->> (gen/mix [r-gen w-gen])
                           (gen/stagger 1)
                           (gen/nemesis
-                            (gen/seq (cycle [(gen/sleep 8)
+                            (gen/seq (cycle [(gen/sleep 9)
                                              {:type :info, :f :start}
-                                             (gen/sleep 8)
+                                             (gen/sleep 9)
                                              {:type :info, :f :stop}])))
                           (gen/time-limit 190))
           :model   (model/register 0)
