@@ -28,7 +28,7 @@
         (info (str node " teardown!"))))
     db/LogFiles
       (log-files [_ test node]
-        ["/master/master.log"])))
+        ["/master/master.debug.log" "/master/master.log"])))
 
 
 (defn client
