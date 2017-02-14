@@ -5,7 +5,7 @@
 
 (defn encode
   [op]
-  (let [allowed-keys #{:f :value :wait-for-yt}]
+  (let [allowed-keys #{:f :value}]
     (json/write-str
       (conj {} (filter (fn [[x _]]
                          (contains? allowed-keys x))
@@ -52,5 +52,5 @@
     (. (Runtime/getRuntime) exec (into-array ["run-proxy.sh" (str port)]))
     (Thread/sleep 3000) ;;waiting for proxy)
     (let [sock (connect addr)]
-      (ysend sock {:wait-for-yt true})
+      (ysend sock {:f :wait-for-yt})
        sock)))
