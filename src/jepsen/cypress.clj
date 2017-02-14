@@ -38,12 +38,13 @@
                                   (info "yt proxy set up")
                                   (client sock)))
     (invoke! [this test op]
-      (timeout 5000 (assoc op :type :info, :error :timeout)
-        (merge op (yt/ysend con op))))
+      ;;(timeout 5000 (assoc op :type :info, :error :timeout)
+        (merge op (yt/ysend con op)))
     (teardown! [_ test] (yt/close con))))
 
 (defn r-gen   [_ _] {:type :invoke, :f :read, :value nil})
 (defn w-gen   [_ _] {:type :invoke, :f :write, :value (rand-int 5)})
+
 
 (defn c-test
   "Given an options map from the command-line runner (e.g. :nodes, :ssh,
@@ -57,7 +58,6 @@
           :db      db
           :client  (client nil)
           :nemesis (nemesis/partition-random-halves)
-          :timeout 120
           :generator (->> (gen/mix [r-gen w-gen])
                           (gen/stagger 1)
                           (gen/nemesis
