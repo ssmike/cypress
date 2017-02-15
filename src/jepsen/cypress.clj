@@ -1,7 +1,6 @@
 (ns jepsen.cypress
   (:gen-class)
-  (:require [clojure.tools.nrepl.server :only (start-server stop-server)]
-            [clojure.tools.logging :refer :all]
+  (:require [clojure.tools.logging :refer :all]
             [clojure.java.io    :as io]
             [clojure.string     :as str]
             [jepsen [db         :as db]
@@ -16,8 +15,6 @@
             [jepsen.os.debian   :as debian]
             [knossos.model      :as model]
             [jepsen.yt :as yt]))
-
-(defonce debug-server (start-server :port 7888))
 
 (def db
   (reify db/DB
@@ -37,9 +34,11 @@
 (defn client
   [con]
   (reify client/Client
-    (setup! [this test node] (let [sock (yt/start-client)]
-                                  (info "yt proxy set up")
-                                  (client sock)))
+    (setup! [this test node]
+        (info "waiting for yt")
+        (let [sock (yt/start-client)]
+          (info "yt proxy set up")
+          (client sock)))
     (invoke! [this test op]
       ;;(timeout 5000 (assoc op :type :info, :error :timeout)
         (merge op (yt/ysend con op)))
@@ -82,8 +81,6 @@
   "Handles command line arguments. Can either run a test, or a web server for
   browsing results."
   [& args]
-  ;; to disable shitty logs
-  (. (org.slf4j.LoggerFactory/getLogger org.slf4j.Logger/ROOT_LOGGER_NAME) setLevel ch.qos.logback.classic.Level/INFO)
   (cli/run! (merge (cli/single-test-cmd {:test-fn c-test})
                    (cli/serve-cmd))
            args))
