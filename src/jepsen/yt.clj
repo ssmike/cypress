@@ -26,7 +26,7 @@
   [{:keys [in cache req-cnt]} msg]
   (let [result (promise)]
     (binding [*out* in]
-      (println (assoc msg :req-id (swap! req-cnt inc)))
+      (println (encode (assoc msg :req-id (swap! req-cnt inc))))
       (flush))
     (when (> (count @cache) 5)
       (swap! cache (conj {} (filter (fn [_ v] (realized? v))))))
