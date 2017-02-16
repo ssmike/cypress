@@ -25,13 +25,15 @@
 
 (defn ysend
   [{:keys [in cache req-cnt]} msg]
-  (let [result (promise)]
+  (let [result (promise)
+        id (swap! req-cnt inc)]
+    (swap! cache (fn [mp] (assoc mp id result)))
     (binding [*out* in]
-      (println (encode (assoc msg :req-id (swap! req-cnt inc))))
+      (println (encode (assoc msg :req-id id)))
       (flush))
-    (when (> (count @cache) 5)
-      (swap! cache (conj {} (filter (fn [_ v] (realized? v))))))
-    @result))
+    (let [value @result]
+      (swap! cache (fn [mp] (dissoc mp id)))
+      value)))
 
 (defn close
   [{:keys [reader in] :as client}]
