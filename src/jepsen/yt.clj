@@ -17,8 +17,9 @@
   (let [mp (json/read-str msg)]
     (into {} (map (fn [[a b]] [(keyword a)
                                ((case a
-                                  "value" identity
-                                          keyword)
+                                  ("value" "req-id")
+                                    identity
+                                    keyword)
                                  b)])
                   mp))))
 
