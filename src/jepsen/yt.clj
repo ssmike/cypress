@@ -44,14 +44,15 @@
   (let [cnt (swap! proxy-num inc)
         proc (. (Runtime/getRuntime) exec (into-array ["run-proxy.sh" (str cnt)]))
         cache (atom {})
-        out (io/reader (. proc getInputStream))]
-    {:in (io/writer (. proc getOutputStream))
-     :cache cache
-     :req-cnt (atom 0)
-     :proxy-id cnt
-     :reader (future
+        out (io/reader (. proc getInputStream))
+        worker (fn []
                 (binding [*in* out]
                   (loop []
                     (let [{id :req-id :as msg} (decode (read-line))]
                       (deliver (get @cache id) msg))
-                    (recur))))}))
+                    (recur))))]
+    {:in (io/writer (. proc getOutputStream))
+     :cache cache
+     :req-cnt (atom 0)
+     :proxy-id cnt
+     :reader (future (worker))}))
