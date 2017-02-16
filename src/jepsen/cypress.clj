@@ -38,7 +38,7 @@
         (info "waiting for yt")
         (let [sock (yt/start-client)]
           (info "waiting for yt")
-          (ysend sock {:f :wait-for-yt})
+          (yt/ysend sock {:f :wait-for-yt})
           (info "yt proxy set up")
           (client sock)))
     (invoke! [this test op]
