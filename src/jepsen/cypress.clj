@@ -47,7 +47,7 @@
     (teardown! [_ test] (yt/close con))))
 
 (defn r-gen   [_ _] {:type :invoke, :f :read, :value nil})
-(defn w-gen   [_ _] {:type :invoke, :f :write, :value (rand-int 5)})
+(defn w-gen   [_ _] {:type :invoke, :f :write, :value (rand-int 20000)})
 
 
 (defn c-test
