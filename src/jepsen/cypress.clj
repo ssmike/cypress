@@ -55,29 +55,30 @@
   :concurrency, ...), constructs a test map."
   [opts]
   (info "Creating test" opts)
-  (merge tests/noop-test
-         opts
-         {:name     "Cypress"
-          :os      debian/os
-          :db      db
-          :client  (client nil)
-          :nemesis (nemesis/partition-random-halves)
-          :timeout 200
-          :generator (->> (gen/mix [r-gen w-gen])
-                          (gen/stagger 1)
-                          (gen/nemesis
-                            (gen/seq (cycle [(gen/sleep 9)
-                                             {:type :info, :f :start}
-                                             (gen/sleep 9)
-                                             {:type :info, :f :stop}])))
-                          (gen/time-limit 190))
-          :model   (model/register 0)
-          :checker (checker/compose
-                     {:perf   (checker/perf)
-                      :linear checker/linearizable})
-          :ssh {:username "root",
-                :strict-host-key-checking false,
-                :private-key-path "~/.ssh/yt"}}))
+  (let [pre-test (merge tests/noop-test opts)
+        timeout (:time-limit pre-test)]
+    {:name     "Cypress"
+     :os      debian/os
+     :db      db
+     :client  (client nil)
+     :nemesis (nemesis/partition-random-halves)
+     :timeout timeout
+     :generator (->> (gen/mix [r-gen w-gen])
+                     (gen/stagger 0.2)
+                     (gen/nemesis
+                       (gen/seq (cycle [(gen/sleep 5)
+                                        {:type :info, :f :start}
+                                        (gen/sleep 5)
+                                        {:type :info, :f :stop}])))
+                     (gen/time-limit timeout))
+     :model   (model/register 0)
+     :checker (checker/compose
+                {:perf   (checker/perf)
+                 :linear checker/linearizable})
+     :ssh {:username "root",
+           :strict-host-key-checking false,
+           :private-key-path "~/.ssh/yt"}}))
+
 
 (defn -main
   "Handles command line arguments. Can either run a test, or a web server for
